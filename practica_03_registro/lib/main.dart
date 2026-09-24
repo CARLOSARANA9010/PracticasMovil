@@ -4,7 +4,7 @@ void main() {
   runApp(const App());
 }
 
-class App extends StatelessWidget {
+final class App extends StatelessWidget {
   const App({super.key});
 
   @override
@@ -12,13 +12,13 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Registro de productos',
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      theme: ThemeData(colorSchemeSeed: Colors.indigo),
       home: const RegistroProductosPage(),
     );
   }
 }
 
-class Producto {
+final class Producto {
   final String nombre;
   final String categoria;
   final double precio;
@@ -92,8 +92,9 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
       productos.removeAt(index);
     });
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('${producto.nombre} eliminado')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${producto.nombre} eliminado')));
   }
 
   @override
@@ -148,9 +149,7 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
                               return null;
                             },
                           ),
-
                           const SizedBox(height: 12),
-
                           DropdownButtonFormField<String>(
                             initialValue: categoria,
                             decoration: const InputDecoration(
@@ -195,9 +194,7 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
                               return null;
                             },
                           ),
-
                           const SizedBox(height: 12),
-
                           TextFormField(
                             controller: precioController,
                             decoration: const InputDecoration(
@@ -226,9 +223,7 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
                               return null;
                             },
                           ),
-
                           const SizedBox(height: 12),
-
                           TextFormField(
                             controller: existenciaController,
                             decoration: const InputDecoration(
@@ -255,9 +250,7 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
                               return null;
                             },
                           ),
-
                           const SizedBox(height: 16),
-
                           SizedBox(
                             width: double.infinity,
                             child: FilledButton.icon(
@@ -269,9 +262,7 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -292,9 +283,9 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
                                   const SizedBox(height: 4),
                                   Text(
                                     '\$${valorTotalInventario.toStringAsFixed(2)}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineSmall,
                                   ),
                                 ],
                               ),
@@ -303,11 +294,8 @@ class _RegistroProductosPageState extends State<RegistroProductosPage> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 8),
-
                     const Divider(),
-
                     Expanded(
                       child: productos.isEmpty
                           ? const Center(
