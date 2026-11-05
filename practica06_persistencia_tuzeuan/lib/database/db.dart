@@ -1,91 +1,160 @@
-import 'package:path/path.dart';
+
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import '../models/nota.dart';
 
 class DB {
-  static Database? _db;
+  static Database? _database;
 
+  static const String nombreBD = 'notas.db';
+  static const int versionBD = 1;
+  static const String tablaNotas = 'notas';
+
+  // Obtener la instancia de la base de datos.
   static Future<Database> get database async {
-    if (_db != null) return _db!;
+    if (_database != null) {
+      return _database!;
+    }
 
-    final ruta = join(await getDatabasesPath(), 'notas.db');
-
-    _db = await openDatabase(
-      ruta,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE notas(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT NOT NULL,
-            contenido TEXT NOT NULL,
-            completada INTEGER NOT NULL DEFAULT 0,
-            pendiente_sincronizar INTEGER NOT NULL DEFAULT 1
-          )
-        ''');
-      },
-    );
-
-    return _db!;
+    _database = await _inicializarBD();
+    return _database!;
   }
 
-  // INSERTAR
+  // Inicializar SQLite según la plataforma.
+  static Future<Database> _inicializarBD() async {
+    if (kIsWeb) {
+      // Implementación SQLite para Flutter Web.
+      return await databaseFactoryFfiWeb.openDatabase(
+        nombreBD,
+        options: OpenDatabaseOptions(
+          version: versionBD,
+          onCreate: (db, version) async {
+            await _crearTabla(db);
+          },
+        ),
+      );
+    } else {
+      // Implementación SQLite para Android e iOS.
+      final ruta = await getDatabasesPath();
+      final path = '$ruta/$nombreBD';
+
+      return await openDatabase(
+        path,
+        version: versionBD,
+        onCreate: (db, version) async {
+          await _crearTabla(db);
+        },
+      );
+    }
+  }
+
+  // Crear tabla de notas.
+  static Future<void> _crearTabla(Database db) async {
+    await db.execute('''
+      CREATE TABLE $tablaNotas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        contenido TEXT NOT NULL,
+        completada INTEGER NOT NULL DEFAULT 0,
+        pendiente_sincronizar INTEGER NOT NULL DEFAULT 1
+      )
+    ''');
+  }
+
+  // INSERTAR una nota.
   static Future<int> insertar(Nota nota) async {
     final db = await database;
 
-    return db.insert('notas', nota.toMap()..remove('id'));
+    final datos = nota.toMap();
+
+    // El ID se genera automáticamente.
+    datos.remove('id');
+
+    return await db.insert(
+      tablaNotas,
+      datos,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
-  // LISTAR
+  // LISTAR todas las notas.
   static Future<List<Nota>> listar() async {
     final db = await database;
 
-    final resultado = await db.query('notas', orderBy: 'id DESC');
+    final resultado = await db.query(
+      tablaNotas,
+      orderBy: 'id DESC',
+    );
 
-    return resultado.map((map) => Nota.fromMap(map)).toList();
+    return resultado.map((mapa) => Nota.fromMap(mapa)).toList();
   }
 
-  // ACTUALIZAR
+  // ACTUALIZAR una nota.
   static Future<int> actualizar(Nota nota) async {
     final db = await database;
 
-    return db.update(
-      'notas',
-      {...nota.toMap(), 'pendiente_sincronizar': 1},
+    return await db.update(
+      tablaNotas,
+      {
+        'titulo': nota.titulo,
+        'contenido': nota.contenido,
+        'completada': nota.completada ? 1 : 0,
+        'pendiente_sincronizar': 1,
+      },
       where: 'id = ?',
       whereArgs: [nota.id],
     );
   }
 
-  // ELIMINAR
+  // ELIMINAR una nota.
   static Future<int> eliminar(int id) async {
     final db = await database;
 
-    return db.delete('notas', where: 'id = ?', whereArgs: [id]);
-  }
-
-  // CAMBIAR ESTADO DE COMPLETADA
-  static Future<int> cambiarEstado(Nota nota) async {
-    final db = await database;
-
-    return db.update(
-      'notas',
-      {'completada': nota.completada ? 1 : 0, 'pendiente_sincronizar': 1},
+    return await db.delete(
+      tablaNotas,
       where: 'id = ?',
-      whereArgs: [nota.id],
+      whereArgs: [id],
     );
   }
 
-  // CONTAR NOTAS PENDIENTES DE SINCRONIZAR
+  // CAMBIAR el estado de una nota.
+  static Future<int> cambiarEstado(
+    int id,
+    bool completada,
+  ) async {
+    final db = await database;
+
+    return await db.update(
+      tablaNotas,
+      {
+        'completada': completada ? 1 : 0,
+        'pendiente_sincronizar': 1,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // CONTAR notas pendientes de sincronización.
   static Future<int> contarPendientes() async {
     final db = await database;
 
-    final resultado = await db.rawQuery(
-      'SELECT COUNT(*) AS total FROM notas '
-      'WHERE pendiente_sincronizar = 1',
-    );
+    final resultado = await db.rawQuery('''
+      SELECT COUNT(*) AS total
+      FROM $tablaNotas
+      WHERE pendiente_sincronizar = 1
+    ''');
 
     return Sqflite.firstIntValue(resultado) ?? 0;
+  }
+
+  // CERRAR la base de datos.
+  static Future<void> cerrar() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
   }
 }
