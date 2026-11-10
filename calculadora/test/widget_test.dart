@@ -13,7 +13,7 @@ void main() {
     expect(find.text('Consumo de combustible'), findsOneWidget);
     expect(find.text('Calculadora de rendimiento'), findsOneWidget);
   });
-
+  //olis
   testWidgets('Widget smoke test: realiza un cálculo desde la interfaz', (
     tester,
   ) async {
