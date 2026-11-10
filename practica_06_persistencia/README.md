@@ -40,7 +40,7 @@ test/
 
 ## Requisitos
 - Flutter SDK (Dart ^3.x)
-- Paquetes: `sqflite`, `shared_preferences`, `path`, `sqflite_common_ffi` (solo para pruebas; ya en `pubspec.yaml`)
+- Paquetes: `sqflite`, `shared_preferences`, `path`, `sqflite_common_ffi_web` (SQLite en navegador) y `sqflite_common_ffi` (solo para pruebas)
 - No requiere Internet
 
 ## Instalación y ejecución
@@ -48,7 +48,12 @@ test/
 cd practica_06_persistencia
 flutter pub get
 flutter run            # emulador o dispositivo Android
+flutter run -d edge    # navegador (Edge/Chrome)
 ```
+
+**Web:** `sqflite` no tiene implementación web, así que en navegador `main.dart` usa `databaseFactoryFfiWebNoWebWorker` con `web/sqlite3.wasm` (SQLite compilado a WebAssembly, versión del paquete `sqlite3` 3.5.2). Los datos se guardan en IndexedDB y también funcionan sin conexión.
+
+**Windows con Flutter en `C:\Program Files`:** los *build hooks* de `sqlite3` fallan por el espacio en la ruta (`'C:\Program' is not recognized...`). Solución: usar la ruta corta (`C:\PROGRA~1\flutter\bin\flutter.bat run -d edge`, igual para `test` y `build`) o instalar Flutter en una ruta sin espacios (p. ej. `C:\src\flutter`).
 
 ## Pruebas
 ```bash
