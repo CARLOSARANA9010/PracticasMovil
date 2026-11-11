@@ -114,6 +114,8 @@ class _SelectorFiltro extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: SegmentedButton<Filtro>(
+        showSelectedIcon:
+            false, // el ícono hace que "Completadas" se parta en pantallas angostas
         segments: const [
           ButtonSegment(value: Filtro.todas, label: Text('Todas')),
           ButtonSegment(value: Filtro.pendientes, label: Text('Pendientes')),
