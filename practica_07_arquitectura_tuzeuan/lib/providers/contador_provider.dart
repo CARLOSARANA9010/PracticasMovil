@@ -11,8 +11,10 @@ class ContadorProvider extends ChangeNotifier {
   }
 
   void decrementar() {
-    _valor--;
-    notifyListeners();
+    if (_valor > 0) {
+      _valor--;
+      notifyListeners();
+    }
   }
 
   void reiniciar() {
