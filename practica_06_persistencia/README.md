@@ -48,10 +48,12 @@ test/
 cd practica_06_persistencia
 flutter pub get
 flutter run            # emulador o dispositivo Android
-flutter run -d edge    # navegador (Edge/Chrome)
+flutter run -d edge --release --no-web-resources-cdn --web-port 8080   # navegador, funciona offline
 ```
 
-**Web:** `sqflite` no tiene implementación web, así que en navegador `main.dart` usa `databaseFactoryFfiWebNoWebWorker` con `web/sqlite3.wasm` (SQLite compilado a WebAssembly, versión del paquete `sqlite3` 3.5.2). Los datos se guardan en IndexedDB y también funcionan sin conexión.
+**Web:** `sqflite` no tiene implementación web, así que en navegador `main.dart` usa `databaseFactoryFfiWebNoWebWorker` con `web/sqlite3.wasm` (SQLite compilado a WebAssembly, versión del paquete `sqlite3` 3.5.2). Los datos se guardan en IndexedDB. Para que la app abra sin internet, `--no-web-resources-cdn` sirve CanvasKit desde el equipo en lugar del CDN de Google, y la fuente Roboto va empaquetada en `assets/fonts/` (en web Flutter la descargaría de Google Fonts).
+
+**Offline en navegador (DevTools → Network → Offline → recargar):** `web/sw.js` es un *service worker* que responde red primero y, sin conexión, desde la caché (`practica06`). En la instalación precarga los archivos base (`main.dart.js`, CanvasKit, `sqlite3.wasm`, fuentes) para que la primera visita ya quede disponible offline. `web/flutter_bootstrap.js` no registra el service worker de Flutter porque está obsoleto y se da de baja solo, lo que borraría el nuestro. Usar `--release` (en debug el servidor de desarrollo necesita conexión para hot reload) y un puerto fijo (`--web-port 8080`): la caché y la base IndexedDB dependen del origen `localhost:puerto`.
 
 **Windows con Flutter en `C:\Program Files`:** los *build hooks* de `sqlite3` fallan por el espacio en la ruta (`'C:\Program' is not recognized...`). Solución: usar la ruta corta (`C:\PROGRA~1\flutter\bin\flutter.bat run -d edge`, igual para `test` y `build`) o instalar Flutter en una ruta sin espacios (p. ej. `C:\src\flutter`).
 

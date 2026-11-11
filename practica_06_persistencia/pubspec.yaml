@@ -56,6 +56,16 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Roboto empaquetada: en web Flutter la descarga de Google Fonts y sin internet no habría texto.
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-400.ttf
+        - asset: assets/fonts/Roboto-500.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-700.ttf
+          weight: 700
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

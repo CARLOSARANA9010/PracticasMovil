@@ -12,7 +12,7 @@ void main() {
     MaterialApp(
       title: 'Práctica 06 Persistencia',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: Colors.teal),
+      theme: ThemeData(colorSchemeSeed: Colors.teal, fontFamily: 'Roboto'),
       home: const TareasPage(),
     ),
   );

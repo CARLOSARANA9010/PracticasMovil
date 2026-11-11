@@ -41,6 +41,10 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    // Modo offline: sw.js guarda la app en caché para poder recargar sin conexión.
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
